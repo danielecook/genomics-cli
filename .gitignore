@@ -1,3 +1,8 @@
+# Google API
+client_secrets.json
+credentials.dat
+config.yaml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
