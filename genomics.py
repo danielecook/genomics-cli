@@ -3,14 +3,11 @@
 
 Usage:
   genomics.py setup
-  ----------------------Files------------------------------
   genomics.py buckets (--list|--create=<name>|--delete=<name>)
   genomics.py objects <bucket> (--list|--upload=<vcf/bcf>)
-  ---------------------Genomics----------------------------
-  genomics.py datasets (--list|--create=<name> [--public]|--delete=<name>|--undelete=<id>)
+  genomics.py datasets (--list [--all]|--create=<name> [--public]|--delete=<name>|--undelete=<id>)
   genomics.py variants (--import=<location> <dataset>)
   genomics.py jobs
-  ---------------------BigQuery----------------------------
   genomics.py query
   genomics.py bigquery --list [--dataset=<dataset>]
   genomics.py --version
@@ -163,7 +160,11 @@ if __name__ == '__main__':
 
   if arguments["datasets"] == True:
     genomics = connect()
-    if arguments["--list"] == True:
+    if arguments["--all"] and arguments["--list"] == True:
+      for dataset in submit(genomics.datasets().list(projectNumber=PROJECT_NUMBER))["datasets"]:
+        variantSets = submit(genomics.variantsets().search(body={"datasetIds":[dataset["id"]]}))["variantSets"]
+        print tabulate(variantSets, headers="keys")
+    elif arguments["--list"] == True:
       list_datasets()
     elif arguments["--create"] is not None:
       isPublic = False
