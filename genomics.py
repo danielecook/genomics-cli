@@ -29,6 +29,7 @@ from tabulate import tabulate
 import os
 from yaml import load, dump
 from pprint import pprint as pp
+from collections import OrderedDict
 
 import httplib2
 import pprint
@@ -161,9 +162,19 @@ if __name__ == '__main__':
   if arguments["datasets"] == True:
     genomics = connect()
     if arguments["--all"] and arguments["--list"] == True:
+      variantSets = []
       for dataset in submit(genomics.datasets().list(projectNumber=PROJECT_NUMBER))["datasets"]:
-        variantSets = submit(genomics.variantsets().search(body={"datasetIds":[dataset["id"]]}))["variantSets"]
-        print tabulate(variantSets, headers="keys")
+        # Format variant Sets
+        variantSets.extend(submit(genomics.variantsets().search(body={"datasetIds":[dataset["id"]]}))["variantSets"])
+        variantSets[-1]["name"] = dataset["name"]
+      variantSets_keys = ["datasetId", "id", "referenceBounds","name"]
+      # Filter for a few select columns.
+      variantSets = [{k:v for k,v in x.items() if k in variantSets_keys} for x in variantSets]
+      # Format reference Bounds 
+      for i,v in enumerate(variantSets): 
+        variantSets[i]["referenceName"] = ', '.join([x["referenceName"] for x in v["referenceBounds"]])
+        del variantSets[i]["referenceBounds"]
+      print(tabulate(variantSets, headers="keys"))
     elif arguments["--list"] == True:
       list_datasets()
     elif arguments["--create"] is not None:
