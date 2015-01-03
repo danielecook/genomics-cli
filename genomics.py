@@ -140,20 +140,18 @@ if __name__ == '__main__':
   if arguments["setup"] == True or not os.path.isfile("config.yaml"):
     config = {}
     config["PROJECT_NUMBER"] = raw_input("Project ID: ")
+    PROJECT_NUMBER = config["PROJECT_NUMBER"] 
     f = open("config.yaml",'w')
     f.write(yaml.dump(config))
   else:
-    try:
-      PROJECT_NUMBER = os.environ["PROJECT_NUMBER"]
-    except:
-      if os.path.isfile("config.yaml"):
-        config = yaml.load(open("config.yaml",'r'))
-        PROJECT_NUMBER = config["PROJECT_NUMBER"]
-      else:
-        config = {}
-        config["PROJECT_NUMBER"] = raw_input("Project Number: ")
-        f = open("config.yaml",'w')
-        f.write(yaml.dump(config))
+    if os.path.isfile("config.yaml"):
+      config = yaml.load(open("config.yaml",'r'))
+      PROJECT_NUMBER = config["PROJECT_NUMBER"]
+    else:
+      config = {}
+      config["PROJECT_NUMBER"] = raw_input("Project Number: ")
+      f = open("config.yaml",'w')
+      f.write(yaml.dump(config))
 
   #==========#
   # Datasets #
@@ -236,7 +234,7 @@ if __name__ == '__main__':
       bucket = arguments["<bucket>"]
 
       # The BytesIO object may be replaced with any io.Base instance.
-      media = MediaIoBaseUpload(io.open(vcf,'r'), 'text/plain')
+      media = MediaIoBaseUpload(io.open(vcf,'rb'), 'text/plain')
       req = cloudstorage.objects().insert(
               bucket=bucket,
               name=vcf,
